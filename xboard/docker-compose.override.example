@@ -1,0 +1,9 @@
+# 生产环境使用 certbot 证书时，复制为 docker-compose.override.yml
+# cp docker-compose.override.example docker-compose.override.yml
+
+services:
+  nginx:
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./landing:/usr/share/nginx/html/landing:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro

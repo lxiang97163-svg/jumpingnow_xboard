@@ -1,0 +1,9 @@
+# 本地开发：Windows 上 80 端口常被占用，用 8080 代替
+# 复制为 docker-compose.override.yml：cp docker-compose.override.8080.example docker-compose.override.yml
+# 然后访问 http://localhost:8080
+
+services:
+  nginx:
+    ports:
+      - "8080:80"
+      - "8443:443"

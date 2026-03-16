@@ -1,0 +1,90 @@
+/**
+ * Jumping Theme - Xboard / NaiveUI 样式覆盖
+ * 设计令牌：Apple Blue #007aff, Indigo #5e5ce6, 深色背景
+ */
+:root {
+    --jumping-primary: #007aff;
+    --jumping-accent: #5e5ce6;
+    --jumping-bg-dark: #000000;
+    --jumping-bg-card: rgba(28, 28, 30, 0.6);
+    --jumping-text-main: #ffffff;
+    --jumping-text-muted: #86868b;
+    --jumping-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* NaiveUI 主题变量覆盖 */
+[data-theme],
+.n-config-provider,
+body {
+    --n-primary: var(--jumping-primary) !important;
+    --n-primary-hover: #0062cc !important;
+    --n-primary-pressed: #0052a3 !important;
+    font-family: var(--jumping-font) !important;
+}
+
+/* 深色背景全局 */
+body {
+    background-color: var(--jumping-bg-dark) !important;
+    color: var(--jumping-text-main) !important;
+}
+
+/* 卡片与面板 */
+.n-card,
+.n-data-table,
+.n-modal {
+    background: var(--jumping-bg-card) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(10px);
+}
+
+/* 主色按钮 */
+.n-button--primary-type,
+.n-button.n-button--primary-type {
+    background: var(--jumping-primary) !important;
+    border-color: var(--jumping-primary) !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+}
+.n-button--primary-type:hover {
+    background: #0062cc !important;
+    border-color: #0062cc !important;
+}
+
+/* 链接色 */
+a,
+.n-button--text-type {
+    color: var(--jumping-primary) !important;
+}
+a:hover {
+    color: #0062cc !important;
+}
+
+/* 输入框 */
+.n-input,
+.n-input__input-el {
+    background: rgba(28, 28, 30, 0.8) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 12px !important;
+    color: var(--jumping-text-main) !important;
+}
+.n-input:focus,
+.n-input--focus,
+.n-input__input-el:focus {
+    border-color: var(--jumping-primary) !important;
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2) !important;
+}
+
+/* 导航与侧边栏 */
+.n-menu,
+.n-layout-sider {
+    background: rgba(0, 0, 0, 0.5) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+.n-menu-item {
+    border-radius: 10px !important;
+}
+.n-menu-item--selected {
+    background: rgba(0, 122, 255, 0.2) !important;
+    color: var(--jumping-primary) !important;
+}
