@@ -1,0 +1,9 @@
+keys:
+  - cipher: chacha20-ietf-poly1305
+    id: '0'
+    port: 26311
+    secret: Fs2GeyaOjqztJuxr32HSwW
+  - cipher: chacha20-ietf-poly1305
+    id: '4'
+    port: 44620
+    secret: UXV4DJCIgmFl4m9wk98nql

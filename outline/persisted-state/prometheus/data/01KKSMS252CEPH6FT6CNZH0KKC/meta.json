@@ -1,0 +1,17 @@
+{
+	"ulid": "01KKSMS252CEPH6FT6CNZH0KKC",
+	"minTime": 1773597600711,
+	"maxTime": 1773604800000,
+	"stats": {
+		"numSamples": 61920,
+		"numSeries": 516,
+		"numChunks": 516
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01KKSMS252CEPH6FT6CNZH0KKC"
+		]
+	},
+	"version": 1
+}
