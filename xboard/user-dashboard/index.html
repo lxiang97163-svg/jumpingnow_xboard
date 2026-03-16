@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户中心 - Jumping</title>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="/theme/jumping/jumping.css">
+    <style>
+        :root { --primary: #007aff; --accent: #5e5ce6; --bg: #000; --card: rgba(28,28,30,0.6); --text: #fff; --muted: #86868b; }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        .nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; background: rgba(0,0,0,0.8); border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .nav-logo { font-weight: 700; font-size: 20px; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; }
+        .nav-links a:hover { color: var(--text); }
+        .btn-cta { background: var(--primary); color: #fff!important; padding: 8px 16px; border-radius: 20px; font-size: 14px; text-decoration: none; }
+        .container { max-width: 1280px; margin: 0 auto; padding: 24px; }
+        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .card { background: var(--card); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .card-title { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+        .card-subtitle { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .card-detail { font-size: 13px; color: var(--muted); }
+        .card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px; }
+        .card-icon.blue { background: rgba(0,122,255,0.2); color: #007aff; }
+        .card-icon.green { background: rgba(52,199,89,0.2); color: #34c759; }
+        .card-icon.yellow { background: rgba(255,204,0,0.2); color: #ffcc00; }
+        .card-icon.pink { background: rgba(255,45,85,0.2); color: #ff2d55; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+        .module-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .subscribe-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; margin: 6px; font-size: 13px; cursor: pointer; border: none; color: #fff; transition: opacity 0.2s; }
+        .subscribe-btn:hover { opacity: 0.9; }
+        .subscribe-btn.red { background: #ff3b30; }
+        .subscribe-btn.blue { background: #007aff; }
+        .subscribe-btn.purple { background: #5856d6; }
+        .subscribe-btn.green { background: #34c759; }
+        .subscribe-btn.black { background: #1c1c1e; }
+        .subscribe-btn.orange { background: #ff9500; }
+        .subscribe-btn.pink { background: #ff2d55; }
+        .client-os { display: flex; gap: 10px; margin-bottom: 16px; }
+        .client-os-btn { padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: var(--text); cursor: pointer; font-size: 14px; }
+        .client-os-btn.active { background: var(--primary); border-color: var(--primary); }
+        .client-list { margin-top: 12px; }
+        .client-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 10px; margin-bottom: 8px; }
+        .client-item a { color: var(--primary); text-decoration: none; font-size: 13px; }
+        .notice-date { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+        .notice-content { font-size: 14px; line-height: 1.6; color: var(--muted); }
+        .chart-wrap { height: 280px; }
+        .loading { text-align: center; padding: 40px; color: var(--muted); }
+        .auth-required { text-align: center; padding: 60px 24px; }
+        .auth-required h2 { margin-bottom: 16px; font-size: 20px; }
+        .auth-required p { color: var(--muted); margin-bottom: 24px; }
+        .auth-required a { color: var(--primary); }
+        .sign-btn { position: fixed; top: 16px; right: 24px; z-index: 100; padding: 8px 20px; background: linear-gradient(135deg, #34c759, #30d158); color: #fff; border: none; border-radius: 20px; cursor: pointer; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <div class="nav-logo">Jumping.</div>
+        <div class="nav-links">
+            <a href="/">首页</a>
+            <a href="/plan">订阅套餐</a>
+            <a href="/server">节点列表</a>
+            <a href="/user">原用户中心</a>
+        </div>
+        <a href="/user" class="btn-cta">用户中心</a>
+    </nav>
+
+    <div class="container" id="app">
+        <div id="auth-required" class="auth-required" style="display:none">
+            <h2>请先登录</h2>
+            <p>此页面需要登录后才能查看。请先在用户中心登录，然后返回此页面。</p>
+            <a href="/user">去登录 →</a>
+        </div>
+        <div id="dashboard" style="display:none">
+            <button class="sign-btn">每日签到</button>
+            <div class="summary-cards">
+                <div class="card">
+                    <div class="card-icon blue"><i class="ph ph-user"></i></div>
+                    <div class="card-subtitle">会员时长</div>
+                    <div class="card-title" id="member-days">--</div>
+                    <div class="card-detail" id="member-detail">--</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon green"><i class="ph ph-drop"></i></div>
+                    <div class="card-subtitle">剩余流量</div>
+                    <div class="card-title" id="traffic-remain">--</div>
+                    <div class="card-detail" id="traffic-detail">--</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon yellow"><i class="ph ph-devices"></i></div>
+                    <div class="card-subtitle">在线设备</div>
+                    <div class="card-title" id="device-count">--</div>
+                    <div class="card-detail" id="device-detail">--</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon pink"><i class="ph ph-wallet"></i></div>
+                    <div class="card-subtitle">钱包余额</div>
+                    <div class="card-title" id="wallet-balance">--</div>
+                    <div class="card-detail" id="wallet-detail">--</div>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <div class="module-title"><i class="ph ph-download-simple"></i> 客户端下载教程</div>
+                    <div class="client-os">
+                        <button class="client-os-btn active" data-os="windows">Windows</button>
+                        <button class="client-os-btn" data-os="android">Android</button>
+                        <button class="client-os-btn" data-os="mac">Mac OS</button>
+                        <button class="client-os-btn" data-os="ios">iPhone</button>
+                    </div>
+                    <div class="client-list" id="client-list">
+                        <div class="client-item"><span>Clash Verge Rev</span><a href="/plan">点击下载</a></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="module-title"><i class="ph ph-link"></i> 订阅地址</div>
+                    <div id="subscribe-btns"></div>
+                </div>
+            </div>
+            <div class="grid-2" style="margin-top:24px">
+                <div class="card">
+                    <div class="module-title"><i class="ph ph-bell"></i> 最新公告</div>
+                    <div class="notice-date" id="notice-date">--</div>
+                    <div class="notice-content" id="notice-content">暂无公告</div>
+                </div>
+                <div class="card">
+                    <div class="module-title"><i class="ph ph-chart-bar"></i> 流量统计</div>
+                    <p class="card-detail" style="margin-bottom:12px">本月流量使用（按倍率分组）</p>
+                    <div class="chart-wrap" id="traffic-chart"></div>
+                </div>
+            </div>
+        </div>
+        <div id="loading" class="loading">加载中...</div>
+    </div>
+
+    <script>
+        const API_BASE = '/api/v1';
+        const TOKEN_KEYS = ['token', 'auth_data', 'auth_token', 'Authorization'];
+        
+        function getToken() {
+            for (const k of TOKEN_KEYS) {
+                let v = localStorage.getItem(k) || sessionStorage.getItem(k);
+                if (v && (v.startsWith('Bearer ') || v.length > 20)) return v.startsWith('Bearer ') ? v : 'Bearer ' + v;
+            }
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (/auth|token/i.test(key)) {
+                    try {
+                        const v = localStorage.getItem(key);
+                        const obj = typeof v === 'string' && (v.startsWith('{') || v.startsWith('[')) ? JSON.parse(v) : v;
+                        if (obj && (obj.auth_data || obj.token)) {
+                            const t = obj.auth_data || obj.token;
+                            return t.startsWith('Bearer ') ? t : 'Bearer ' + t;
+                        }
+                    } catch (_) {}
+                }
+            }
+            return null;
+        }
+
+        async function api(path, opts = {}) {
+            const token = getToken();
+            const headers = { 'Accept': 'application/json', 'Content-Type': 'application/json', ...opts.headers };
+            if (token) headers['Authorization'] = token;
+            const res = await fetch(API_BASE + path, { ...opts, headers, credentials: 'same-origin' });
+            const data = await res.json().catch(() => ({}));
+            if (res.status === 401 || res.status === 403) throw new Error('未登录');
+            if (data.status === 'fail') throw new Error(data.message || '请求失败');
+            return data.data;
+        }
+
+        function fmtBytes(b) {
+            if (!b || b < 0) return '0 B';
+            const gb = 1024 ** 3, mb = 1024 ** 2, kb = 1024;
+            if (b >= gb) return (b / gb).toFixed(2) + ' GB';
+            if (b >= mb) return (b / mb).toFixed(2) + ' MB';
+            if (b >= kb) return (b / kb).toFixed(2) + ' KB';
+            return b + ' B';
+        }
+
+        function fmtDate(ts) {
+            if (!ts) return '--';
+            const d = new Date(ts * 1000);
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        }
+
+        function fmtDateTime(ts) {
+            if (!ts) return '--';
+            const d = new Date(ts * 1000);
+            return String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + ' ' + d.toTimeString().slice(0,8);
+        }
+
+        async function loadDashboard() {
+            const loading = document.getElementById('loading');
+            const authReq = document.getElementById('auth-required');
+            const dash = document.getElementById('dashboard');
+            
+            if (!getToken()) {
+                loading.style.display = 'none';
+                authReq.style.display = 'block';
+                return;
+            }
+
+            try {
+                const [info, sub, notice, traffic, comm] = await Promise.all([
+                    api('/user/info'),
+                    api('/user/getSubscribe'),
+                    api('/user/notice/fetch'),
+                    api('/user/stat/getTrafficLog'),
+                    api('/user/comm/config').catch(() => ({}))
+                ]);
+
+                loading.style.display = 'none';
+                dash.style.display = 'block';
+
+                const now = Math.floor(Date.now() / 1000);
+                const exp = info.expired_at || 0;
+                const days = exp > now ? Math.ceil((exp - now) / 86400) : 0;
+                document.getElementById('member-days').textContent = days + ' 天';
+                document.getElementById('member-detail').textContent = (sub.plan?.name || '未订阅') + ': ' + fmtDate(exp) + ' 到期';
+
+                const total = sub.transfer_enable || 0;
+                const used = (sub.u || 0) + (sub.d || 0);
+                const remain = Math.max(0, total - used);
+                document.getElementById('traffic-remain').textContent = fmtBytes(remain);
+                document.getElementById('traffic-detail').textContent = '下次重置: ' + (sub.next_reset_at ? fmtDateTime(sub.next_reset_at) : '未购买套餐');
+
+                const deviceLimit = sub.device_limit;
+                document.getElementById('device-count').textContent = '1/' + (deviceLimit ?? '无限制');
+                document.getElementById('device-detail').textContent = '上次使用: ' + (info.last_login_at ? fmtDateTime(info.last_login_at) : '--');
+
+                const balance = (info.balance || 0) / 100;
+                const rebate = (info.commission_balance || 0) / 100;
+                document.getElementById('wallet-balance').textContent = '¥' + balance.toFixed(2);
+                document.getElementById('wallet-detail').textContent = '返利累计: ¥' + rebate.toFixed(0);
+
+                const subUrl = sub.subscribe_url || '';
+                const subs = [
+                    { name: 'Clash', flag: 'clash', class: 'blue' },
+                    { name: 'Surge', flag: 'surge', class: 'purple' },
+                    { name: 'Quantumult X', flag: 'quantumultx', class: 'black' },
+                    { name: 'Shadowrocket', flag: 'shadowrocket', class: 'blue' },
+                    { name: 'V2Ray', flag: 'v2rayn', class: 'red' },
+                    { name: 'Stash', flag: 'stash', class: 'green' }
+                ];
+                const subDiv = document.getElementById('subscribe-btns');
+                subDiv.innerHTML = subs.map(s => {
+                    const url = subUrl + (subUrl.includes('?') ? '&' : '?') + 'flag=' + s.flag;
+                    return `<button class="subscribe-btn ${s.class}" data-url="${url}">复制 ${s.name} 订阅</button>`;
+                }).join('');
+                subDiv.querySelectorAll('button').forEach(btn => {
+                    btn.onclick = () => {
+                        navigator.clipboard.writeText(btn.dataset.url);
+                        const t = btn.textContent;
+                        btn.textContent = '已复制';
+                        setTimeout(() => btn.textContent = t, 1500);
+                    };
+                });
+
+                const notices = Array.isArray(notice) ? notice : (notice?.data || []);
+                const latest = notices[0];
+                if (latest) {
+                    document.getElementById('notice-date').textContent = '更新日期: ' + fmtDateTime(latest.created_at);
+                    document.getElementById('notice-content').innerHTML = latest.content || latest.title || '暂无';
+                }
+
+                const trafficData = Array.isArray(traffic) ? traffic : [];
+                const byRate = {};
+                trafficData.forEach(r => {
+                    const k = 'x' + (r.server_rate || 1);
+                    if (!byRate[k]) byRate[k] = { name: '倍率 ' + (r.server_rate || 1), value: 0 };
+                    byRate[k].value += (r.u || 0) + (r.d || 0);
+                });
+                const chartData = Object.values(byRate).sort((a,b) => b.value - a.value).slice(0, 10);
+                if (chartData.length) {
+                    const chart = echarts.init(document.getElementById('traffic-chart'));
+                    chart.setOption({
+                        backgroundColor: 'transparent',
+                        grid: { left: 40, right: 20, top: 20, bottom: 30 },
+                        xAxis: { type: 'category', data: chartData.map(d => d.name), axisLabel: { color: '#86868b' } },
+                        yAxis: { type: 'value', axisLabel: { color: '#86868b' }, splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } } },
+                        series: [{ type: 'bar', data: chartData.map(d => (d.value / 1024 / 1024).toFixed(0)), itemStyle: { color: '#007aff' } }]
+                    });
+                } else {
+                    document.getElementById('traffic-chart').innerHTML = '<div class="loading">暂无流量数据</div>';
+                }
+
+            } catch (e) {
+                loading.style.display = 'none';
+                authReq.style.display = 'block';
+                authReq.querySelector('p').textContent = e.message || '加载失败，请先登录用户中心再返回此页面。';
+            }
+        }
+
+        document.querySelectorAll('.client-os-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.client-os-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            };
+        });
+
+        loadDashboard();
+    </script>
+</body>
+</html>

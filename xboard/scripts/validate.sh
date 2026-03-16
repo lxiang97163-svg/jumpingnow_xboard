@@ -41,6 +41,18 @@ if [[ ! -f "jumping-theme/jumping.css" ]]; then
 else
   echo "✓ jumping-theme/jumping.css"
 fi
+if [[ ! -d "user-dashboard" ]]; then
+  echo "❌ user-dashboard 目录不存在"
+  ((ERRORS++))
+else
+  echo "✓ user-dashboard/"
+fi
+if [[ ! -f "user-dashboard/index.html" ]]; then
+  echo "❌ user-dashboard/index.html 不存在"
+  ((ERRORS++))
+else
+  echo "✓ user-dashboard/index.html"
+fi
 
 echo ""
 echo "=== 2. compose.yaml 路径与 nginx.conf 一致性 ==="
