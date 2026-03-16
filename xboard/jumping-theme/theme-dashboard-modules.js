@@ -5,6 +5,7 @@
  */
 (function () {
   'use strict';
+  console.log('[JDM] Loaded v2026.03.16-Fix2');
 
   var INJECT_ID = 'JDM';
   var API_BASE = '/api/v1';
@@ -599,7 +600,7 @@
     _guardObserver.observe(target, { childList: true });
   }
 
-  /* ─── Retry ──────────────────────────────────────────────── */
+  /* ─── Retry 修复版 v2 ────────────────────────────────────── */
   function tryInject() {
     if (!isDashboard()) {
       _tryInjectScheduled = false;
@@ -609,6 +610,12 @@
     var hasContent = false;
 
     var timer = setInterval(function () {
+      /* 每次轮询严格检查路由，一旦切走立即终止 */
+      if (!isDashboard()) {
+        clearInterval(timer);
+        _tryInjectScheduled = false;
+        return;
+      }
       tries++;
       var target = findTarget();
       if (!target) {
@@ -619,13 +626,14 @@
         return;
       }
 
-      /* 等 Vue 把内容渲染进去（target 有子元素）再注入，避免被 Vue 清除 */
+      /* 等 Vue 把内容渲染进去再注入 */
       if (!hasContent && target.children.length > 0) {
         hasContent = true;
         clearInterval(timer);
-        /* 额外等 400ms 让 Vue 完成所有后处理 */
-        var capturedTarget = target; /* 闭包捕获已验证的 target */
+        /* 延迟 400ms 避开 Vue 渲染抖动 */
+        var capturedTarget = target;
         setTimeout(function () {
+          /* 最终注入前的最后一道防线：必须还在 Dashboard */
           if (isDashboard() && !document.getElementById(INJECT_ID)) {
             injectModules(capturedTarget);
             startGuard(capturedTarget);
@@ -646,18 +654,32 @@
     _reInjectTimer = null;
     _tryInjectScheduled = false;
     if (_guardObserver) { _guardObserver.disconnect(); _guardObserver = null; }
-    var el = document.getElementById(INJECT_ID);
-    if (el && el.parentNode) el.parentNode.removeChild(el);
+    
+    /* 暴力清理所有残留实例 */
+    var els = document.querySelectorAll('#' + INJECT_ID);
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      el.style.display = 'none'; /* 先隐藏，防删除失败视觉残留 */
+      if (el.remove) {
+        el.remove();
+      } else if (el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+    }
   }
 
-  /** 根据当前路由同步：非 dashboard 必须移除模块；在 dashboard 且无模块则尝试注入（SPA 不刷新页面，hashchange 可能不触发）*/
+  /** 路由同步逻辑：激进清理模式 */
   function syncRoute() {
     var onDash = isDashboard();
-    var hasMod = !!document.getElementById(INJECT_ID);
-    if (hasMod && !onDash) {
+    
+    /* 只要检测到不是 Dashboard，立即执行清理，不犹豫 */
+    if (!onDash) {
       removeModules();
       return;
     }
+
+    /* 是 Dashboard 且没模块 -> 启动注入 */
+    var hasMod = !!document.getElementById(INJECT_ID);
     if (!hasMod && onDash && getToken() && !_tryInjectScheduled) {
       _tryInjectScheduled = true;
       setTimeout(function () {
